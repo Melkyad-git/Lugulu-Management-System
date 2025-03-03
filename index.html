@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lugulu Sec. School Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #8B4513; /* Brown background for the whole page */
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        
+        h1, h2, h3 {
+            text-align: center;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #5c6bc0;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #3f4a7e;
+        }
+
+        .back-btn {
+            background-color: #ccc;
+        }
+
+        .back-btn:hover {
+            background-color: #bbb;
+        }
+
+        .input-container input {
+            padding: 8px;
+            width: 80%;
+        }
+
+        #studentDetailsDisplay, #teacherDetailsDisplay {
+            margin-top: 20px;
+        }
+
+        .update-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+        }
+        
+        .update-btn:hover {
+            background-color: #45a049;
+        }
+
+        /* Purple background for Teacher and Student dashboards */
+        #teacherDashboard, #studentDashboard {
+            background-color: #800080; /* Purple background */
+            color: white;
+        }
+
+        /* Purple background for Teacher and Student login */
+        #loginPage.teacher, #loginPage.student {
+            background-color: #800080; /* Purple background */
+        }
+
+    </style>
+</head>
+<body>
+    <h1>LUGULU SEC. SCHOOL</h1>
+
+    <!-- Login Page -->
+    <div id="loginPage" class="container">
+        <h2>Login</h2>
+        <div class="form-group">
+            <label for="username">Name</label>
+            <input type="text" id="username" placeholder="Enter your name">
+        </div>
+        <div class="form-group">
+            <label for="password">Admission/TSC Number</label>
+            <div style="position: relative;">
+                <input type="password" id="password" placeholder="Enter your admission or TSC number">
+                <span id="togglePassword" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;">
+                    🙈
+                </span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="role">Login as</label>
+            <select id="role" onchange="updateLoginPageBackground()">
+                <option value="" disabled selected>Select Role</option>
+                <option value="Admin">Admin</option>
+                <option value="Teacher">Teacher</option>
+                <option value="Student">Student</option>
+            </select>
+        </div>
+        <button onclick="login()">Login</button>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminPanel" class="container hidden">
+        <h2>Welcome, Blessed School Admin</h2>
+        <button onclick="navigate('addStudentPage')">Add New Student</button>
+        <button onclick="navigate('checkStudentPage')">Check Student Details</button>
+        <button onclick="navigate('addTeacherPage')">Add New Teacher</button>
+        <button onclick="navigate('checkTeacherPage')">Check Teacher Details</button>
+        
+        <h3>Update Fee Structure:</h3>
+        <div class="form-group">
+            <textarea id="newFeeStructure" placeholder="Enter new fee structure details..."></textarea>
+            <button onclick="updateFeeStructure()">Update Fee Structure</button>
+        </div>
+        
+        <h3>Update Exams:</h3>
+        <div class="form-group">
+            <input type="text" id="examName" placeholder="Enter exam name">
+            <input type="date" id="examDate">
+            <button onclick="updateExams()">Add Exam</button>
+        </div>
+        
+        <button class="back-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Add Student -->
+    <div id="addStudentPage" class="container hidden">
+        <h2>Add New Student</h2>
+        <div class="form-group">
+            <label for="studentName">Student's Name</label>
+            <input type="text" id="studentName">
+        </div>
+        <div class="form-group">
+            <label for="admissionNumber">Admission Number</label>
+            <input type="text" id="admissionNumber">
+        </div>
+        <div class="form-group">
+            <label for="parentName">Parent's Name</label>
+            <input type="text" id="parentName">
+        </div>
+        <div class="form-group">
+            <label for="feeBalance">Fee Balance</label>
+            <input type="text" id="feeBalance">
+        </div>
+        <button onclick="saveStudent()">Save</button>
+        <button class="back-btn" onclick="navigate('adminPanel')">Back</button>
+    </div>
+
+    <!-- Check Student Details -->
+    <div id="checkStudentPage" class="container hidden">
+        <h2>Check Student Details</h2>
+        <div class="input-container">
+            <input type="text" id="checkStudentAdmissionNumber" placeholder="Enter Admission Number to search">
+            <button onclick="checkStudentDetails()">Search</button>
+        </div>
+        <div id="studentDetailsDisplay"></div>
+        <button class="back-btn" onclick="navigate('adminPanel')">Back</button>
+
+        <!-- Update Details Button -->
+        <div id="updateStudentDetailsSection" class="hidden">
+            <button onclick="navigateToUpdatePage()" class="update-btn">Update Student Details</button>
+        </div>
+
+        <!-- Editable Update Section -->
+        <div id="updateStudentForm" class="hidden">
+            <h3>Edit Student Details</h3>
+            <div class="form-group">
+                <label for="editStudentName">Student's Name</label>
+                <input type="text" id="editStudentName">
+            </div>
+            <div class="form-group">
+                <label for="editParentName">Parent's Name</label>
+                <input type="text" id="editParentName">
+            </div>
+            <div class="form-group">
+                <label for="editFeeBalance">Fee Balance</label>
+                <input type="text" id="editFeeBalance">
+            </div>
+            <button onclick="saveUpdatedStudent()">Save Changes</button>
+            <button class="back-btn" onclick="navigate('adminPanel')">Back</button>
+        </div>
+    </div>
+
+    <!-- Add Teacher -->
+    <div id="addTeacherPage" class="container hidden">
+        <h2>Add New Teacher</h2>
+        <div class="form-group">
+            <label for="teacherName">Teacher's Name</label>
+            <input type="text" id="teacherName">
+        </div>
+        <div class="form-group">
+            <label for="tscNumber">TSC Number</label>
+            <input type="text" id="tscNumber">
+        </div>
+        <div class="form-group">
+            <label for="subject">Subject</label>
+            <input type="text" id="subject">
+        </div>
+        <button onclick="saveTeacher()">Save</button>
+        <button class="back-btn" onclick="navigate('adminPanel')">Back</button>
+    </div>
+
+    <!-- Check Teacher Details -->
+    <div id="checkTeacherPage" class="container hidden">
+        <h2>Check Teacher Details</h2>
+        <div class="input-container">
+            <input type="text" id="checkTeacherTSCNumber" placeholder="Enter TSC Number to search">
+            <button onclick="checkTeacherDetails()">Search</button>
+        </div>
+        <div id="teacherDetailsDisplay"></div>
+        <button class="back-btn" onclick="navigate('adminPanel')">Back</button>
+    </div>
+
+    <!-- Student Dashboard -->
+    <div id="studentDashboard" class="container hidden">
+        <h2>Welcome to Your Dashboard, <span id="studentNameDisplay"></span></h2>
+        <p><strong>Admission Number:</strong> <span id="studentAdmissionNumberDisplay"></span></p>
+        <p><strong>Parent's Name:</strong> <span id="studentParentNameDisplay"></span></p>
+        <p><strong>Fee Balance:</strong> <span id="studentFeeBalanceDisplay"></span></p>
+
+        <h3>Fee Structure:</h3>
+        <p id="feeStructureDisplay"></p>
+
+        <h3>Upcoming Exams:</h3>
+        <ul id="examList"></ul>
+
+        <button class="back-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Teacher Dashboard -->
+    <div id="teacherDashboard" class="container hidden">
+        <h2>Welcome, Teacher <span id="teacherNameDisplay"></span></h2>
+        <p><strong>TSC Number:</strong> <span id="teacherTSCNumberDisplay"></span></p>
+        <p><strong>Subject:</strong> <span id="teacherSubjectDisplay"></span></p>
+
+        <button class="back-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <script>
+        const users = {
+            admin: {
+                username: "LUGULU ADM",
+                password: "LUGULUADM4321"
+            },
+            teachers: {
+                "12345": { name: "Mr. John", tscNumber: "12345", subject: "Math" },
+                "67890": { name: "Ms. Alice", tscNumber: "67890", subject: "Science" }
+            },
+            students: {
+                "S001": { name: "Ivy", admissionNumber: "S001", parentName: "Mr. and Mrs. Doe", feeBalance: 500 },
+                "S002": { name: "Gael", admissionNumber: "S002", parentName: "Mr. and Mrs. Smith", feeBalance: 200 }
+            }
+        };
+
+        // Function to handle login
+        function login() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            const role = document.getElementById("role").value;
+            
+            if (role === "Admin" && username === users.admin.username && password === users.admin.password) {
+                navigate("adminPanel");
+            } else if (role === "Teacher" && users.teachers[password]) {
+                const teacher = users.teachers[password];
+                document.getElementById("teacherNameDisplay").textContent = teacher.name;
+                document.getElementById("teacherTSCNumberDisplay").textContent = teacher.tscNumber;
+                document.getElementById("teacherSubjectDisplay").textContent = teacher.subject;
+                navigate("teacherDashboard");
+            } else if (role === "Student" && users.students[password]) {
+                const student = users.students[password];
+                document.getElementById("studentNameDisplay").textContent = student.name;
+                document.getElementById("studentAdmissionNumberDisplay").textContent = student.admissionNumber;
+                document.getElementById("studentParentNameDisplay").textContent = student.parentName;
+                document.getElementById("studentFeeBalanceDisplay").textContent = student.feeBalance;
+                navigate("studentDashboard");
+            } else {
+                alert("Invalid login details");
+            }
+        }
+
+        // Function to navigate between pages
+        function navigate(pageId) {
+            const pages = document.querySelectorAll(".container");
+            pages.forEach(page => {
+                page.classList.add("hidden");
+            });
+            document.getElementById(pageId).classList.remove("hidden");
+        }
+
+        // Function to logout
+        function logout() {
+            navigate("loginPage");
+        }
+
+        // Function to save new student
+        function saveStudent() {
+            const studentName = document.getElementById("studentName").value;
+            const admissionNumber = document.getElementById("admissionNumber").value;
+            const parentName = document.getElementById("parentName").value;
+            const feeBalance = document.getElementById("feeBalance").value;
+
+            users.students[admissionNumber] = {
+                name: studentName,
+                admissionNumber: admissionNumber,
+                parentName: parentName,
+                feeBalance: feeBalance
+            };
+
+            alert("Student added successfully!");
+            navigate("adminPanel");
+        }
+
+        // Function to save new teacher
+        function saveTeacher() {
+            const teacherName = document.getElementById("teacherName").value;
+            const tscNumber = document.getElementById("tscNumber").value;
+            const subject = document.getElementById("subject").value;
+
+            users.teachers[tscNumber] = {
+                name: teacherName,
+                tscNumber: tscNumber,
+                subject: subject
+            };
+
+            alert("Teacher added successfully!");
+            navigate("adminPanel");
+        }
+
+        // Function to check student details
+        function checkStudentDetails() {
+            const admissionNumber = document.getElementById("checkStudentAdmissionNumber").value;
+            const student = users.students[admissionNumber];
+            
+            if (student) {
+                const studentDetails = `
+                    <p><strong>Student's Name:</strong> ${student.name}</p>
+                    <p><strong>Parent's Name:</strong> ${student.parentName}</p>
+                    <p><strong>Fee Balance:</strong> ${student.feeBalance}</p>
+                `;
+                document.getElementById("studentDetailsDisplay").innerHTML = studentDetails;
+            } else {
+                alert("Student not found.");
+            }
+        }
+
+        // Function to check teacher details
+        function checkTeacherDetails() {
+            const tscNumber = document.getElementById("checkTeacherTSCNumber").value;
+            const teacher = users.teachers[tscNumber];
+            
+            if (teacher) {
+                const teacherDetails = `
+                    <p><strong>Teacher's Name:</strong> ${teacher.name}</p>
+                    <p><strong>Subject:</strong> ${teacher.subject}</p>
+                `;
+                document.getElementById("teacherDetailsDisplay").innerHTML = teacherDetails;
+            } else {
+                alert("Teacher not found.");
+            }
+        }
+
+        // Function to update fee structure
+        function updateFeeStructure() {
+            const feeStructure = document.getElementById("newFeeStructure").value;
+            alert("Fee Structure Updated Successfully!");
+        }
+
+        // Function to update exams
+        function updateExams() {
+            const examName = document.getElementById("examName").value;
+            const examDate = document.getElementById("examDate").value;
+            alert("Exam Added Successfully!");
+        }
+
+        // Password visibility toggle
+        document.getElementById("togglePassword").addEventListener("click", function () {
+            const passwordField = document.getElementById("password");
+            const toggleIcon = document.getElementById("togglePassword");
+
+            if (passwordField.type === "password") {
+                passwordField.type = "text";
+                toggleIcon.textContent = "🙉";  // Show password
+            } else {
+                passwordField.type = "password";
+                toggleIcon.textContent = "🙈";  // Hide password
+            }
+        });
+
+        // Function to update background color based on role
+        function updateLoginPageBackground() {
+            const role = document.getElementById("role").value;
+            const loginPage = document.getElementById("loginPage");
+            
+            if (role === "Teacher" || role === "Student") {
+                loginPage.classList.add(role.toLowerCase());
+            } else {
+                loginPage.classList.remove("teacher", "student");
+            }
+        }
+
+    </script>
+</body>
+</html>
